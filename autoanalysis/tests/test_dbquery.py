@@ -23,7 +23,7 @@ class TestDBquery(unittest.TestCase):
     def test_getConfigByName(self):
         group = 'general'
         test = 'BINWIDTH'
-        expected = 20
+        expected = 10
         data = self.dbi.getConfigByName(group,test)
         self.assertEqual(int(data),expected)
 
