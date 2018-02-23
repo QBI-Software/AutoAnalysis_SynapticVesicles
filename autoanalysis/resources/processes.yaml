@@ -1,27 +1,19 @@
 process1:
-  caption: 1. Filter Data
-  href: filter
-  description: For each cell, filter data within range specified in config
+  caption: 1. Bleach Averaging
+  href: bleach
+  description: For each cell, subtract bleach average then generate plots vs time for selection
   output: local
-  filesin: DATA_FILENAME
-  filesout: FILTERED_FILENAME
-  modulename: autoanalysis.processmodules.Filter
-  classname: AutoFilter
+  filesin: DATA_FILENAME, BLEACH_FILENAME
+  filesout: EXPT_EXCEL
+  modulename: autoanalysis.processmodules.Bleach
+  classname: BleachAvg
 process2:
-  caption: 2. Generate Histograms
-  href: histogram
-  description: For each cell, generate relative frequency histograms
-  filesin: FILTERED_FILENAME
+  caption: 2. Normalize Baseline
+  href: baseline
+  description: For each cell, normalize data to baseline from x frames before stimulus, divide by Max depletion then generate overlay of plots vs time (with Mean +- Std)
+  filesin: EXPT_EXCEL
   output: local
-  filesout: HISTOGRAM_FILENAME
-  modulename: autoanalysis.processmodules.Histogram
-  classname: AutoHistogram
-process3:
-  caption: 3. Batch Data
-  href: compile
-  description: Compiles all filtered data
-  filesin: FILTERED_FILENAME
-  output: batch
-  filesout: BATCH_FILENAME
-  modulename: autoanalysis.processmodules.Batch
-  classname: AutoBatch
+  filesout: EXPT_NORM
+  modulename: autoanalysis.processmodules.Baseline
+  classname: Normalized
+
