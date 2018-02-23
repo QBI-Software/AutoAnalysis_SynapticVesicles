@@ -49,7 +49,8 @@ class Bleach(AutoData):
         msg = "BLEACH: Data loaded  from %s" % self.datafile
         self.logandprint(msg)
         # Output
-        self.suffix = 'Empty.xlsx' #maybe overwritten by configurables
+        self.suffix = 'Processed.xlsx' #maybe overwritten by configurables
+        self.roifile = None
         self.outputdir = outputdir
         self.showplots = showplots
 
@@ -59,7 +60,8 @@ class Bleach(AutoData):
         :return:
         '''
         cfg = OrderedDict()
-        cfg['EXPT_EXCEL']='*Empty.xlsx'
+        cfg['EXPT_EXCEL']='_Processed.xlsx'
+        cfg['ROI_FILE'] = "_ROIlist.csv"
         return cfg
 
     def setConfigurables(self,cfg):
@@ -67,6 +69,12 @@ class Bleach(AutoData):
             self.suffix = cfg['EXPT_EXCEL']
             if self.suffix.startswith('*'):
                 self.suffix = self.suffix[1:]
+        if 'ROI_FILE' in cfg.keys() and cfg['ROI_FILE'] is not None:
+            roifile = cfg['ROI_FILE']
+            if roifile.startswith('*'):
+                self.roifile = join(self.outputdir,self.bname + "_"+roifile[1:])
+            else:
+                self.roifile = join(self.outputdir,roifile)
 
     def outputExcelData(self, outputfile,all):
         writer = pd.ExcelWriter(outputfile, engine='xlsxwriter')
@@ -98,14 +106,12 @@ class Bleach(AutoData):
         return fig
 
     def saveROIlist(self,roilist):
-
-        outputfile = join(self.outputdir, self.bname + self.roilist)
-        with open(outputfile, 'w') as myfile:
+        with open(self.roifile, 'w') as myfile:
             for v in roilist:
                 if v.startswith('ROI'):
                     myfile.write(v)
                     myfile.write('\n')
-        msg = "ROI list saved: %s" % outputfile
+        msg = "ROI list saved: %s" % self.roifile
         self.logandprint(msg)
 
     def run(self):
@@ -173,7 +179,7 @@ def create_parser():
     parser.add_argument('--bleachfile', action='store', help='Data file', default="Bleach Time Trace(s).csv")
     parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Projects\\Anggono\\data")
     parser.add_argument('--suffix', action='store', help='Output filename suffix', default="Processed.xlsx")
-    parser.add_argument('--roilist', action='store', help='Selected ROI list', default="_ROIlist.csv")
+    parser.add_argument('--roilist', action='store', help='Selected ROI list', default="*ROIlist.csv")
 
     return parser
 
@@ -189,13 +195,13 @@ if __name__ == "__main__":
     print("Output:", args.outputdir)
 
     try:
-        mod = Bleach(datafiles, args.outputdir,showplots=False)
+        mod = Bleach(datafiles, args.outputdir,showplots=True)
         cfg = mod.getConfigurables()
         for c in cfg.keys():
             print("config set: ",c,"=", cfg[c])
         #set values - this will be done from configdb
         cfg['EXPT_EXCEL']=args.suffix
-        cfg['ROI_LIST'] = args.roilist
+        cfg['ROI_FILE'] = args.roilist
         mod.setConfigurables(cfg)
         if mod.data is not None:
             mod.run()
