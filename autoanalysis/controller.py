@@ -145,15 +145,18 @@ class TestThread(threading.Thread):
         # Instantiate module
         module = importlib.import_module(self.module_name)
         class_ = getattr(module, self.class_name)
+        print('Filename: ', filename)
         mod = class_(filename, outputdir, sheet=self.config['SHEET'],
                      skiprows=self.config['SKIPROWS'],
                      headers=self.config['HEADERS'])
+        print('Module instantiated: ', self.class_name)
         cfg = mod.getConfigurables()
         for c in cfg.keys():
             cfg[c] = self.controller.db.getConfigByName(self.controller.currentconfig, c)
             print("config set: ", cfg[c])
         mod.setConfigurables(cfg)
         if mod.data is not None:
+            print("running mod ..")
             q[filename] = mod.run()
         else:
             q[filename] = None

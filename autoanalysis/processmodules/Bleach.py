@@ -18,6 +18,7 @@ import argparse
 import logging
 import sys
 from os.path import join, basename, splitext
+from os import access,R_OK
 from collections import OrderedDict
 import pandas as pd
 import xlsxwriter
@@ -32,27 +33,16 @@ class Bleach(AutoData):
     """
     Filter class for filtering a dataset based on a single column of data between min and max limits
     """
-    def __init__(self, datafiles,outputdir, sheet=0, skiprows=0, headers=None, showplots=False):
-        #Two input data files 1. Datafile 2. Bleachdata
-        if isinstance(datafiles, list) and len(datafiles)==2:
-            datafile = datafiles[0]
-            bleachfile = datafiles[1]
-        else:
-            raise IOError("Two input files required: datafile and bleachdata")
+    def __init__(self, datafile,outputdir, sheet=0, skiprows=0, headers=None, showplots=False):
         # Load data
-
         super().__init__(datafile, sheet, skiprows, headers)
         msg = "BLEACH: Data loaded from %s" % self.datafile
         self.logandprint(msg)
-        self.datafile = bleachfile
-        self.bleachdata = self.load_data()
-        msg = "BLEACH: Data loaded  from %s" % self.datafile
-        self.logandprint(msg)
         # Output
-        self.suffix = 'Processed.xlsx' #maybe overwritten by configurables
-        self.roifile = None
         self.outputdir = outputdir
         self.showplots = showplots
+        # Set config defaults
+        self.cfg = self.getConfigurables()
 
     def getConfigurables(self):
         '''
@@ -61,20 +51,21 @@ class Bleach(AutoData):
         '''
         cfg = OrderedDict()
         cfg['EXPT_EXCEL']='_Processed.xlsx'
-        cfg['ROI_FILE'] = "_ROIlist.csv"
+        cfg['ROI_FILE'] = '_ROIlist.csv'
+        cfg['BLEACH_FILENAME'] = 'Bleach Time Trace(s).csv'
         return cfg
 
     def setConfigurables(self,cfg):
-        if 'EXPT_EXCEL' in cfg.keys() and cfg['EXPT_EXCEL'] is not None:
-            self.suffix = cfg['EXPT_EXCEL']
-            if self.suffix.startswith('*'):
-                self.suffix = self.suffix[1:]
-        if 'ROI_FILE' in cfg.keys() and cfg['ROI_FILE'] is not None:
-            roifile = cfg['ROI_FILE']
-            if roifile.startswith('*'):
-                self.roifile = join(self.outputdir,self.bname + "_"+roifile[1:])
-            else:
-                self.roifile = join(self.outputdir,roifile)
+        '''
+        Merge any variables set externally
+        :param cfg:
+        :return:
+        '''
+        if self.cfg is None:
+            self.cfg = self.getConfigurables()
+        for cf in cfg.keys():
+            self.cfg[cf]= cfg[cf]
+        self.logandprint("Config loaded")
 
     def outputExcelData(self, outputfile,all):
         writer = pd.ExcelWriter(outputfile, engine='xlsxwriter')
@@ -106,19 +97,45 @@ class Bleach(AutoData):
         return fig
 
     def saveROIlist(self,roilist):
-        with open(self.roifile, 'w') as myfile:
+        roifile = self.getFilename('ROI_FILE')
+        with open(roifile, 'w') as myfile:
             for v in roilist:
                 if v.startswith('ROI'):
                     myfile.write(v)
                     myfile.write('\n')
-        msg = "ROI list saved: %s" % self.roifile
+        msg = "ROI list saved: %s" % roifile
         self.logandprint(msg)
+
+    def getFilename(self, cfgparam, input=False):
+        '''
+        Compile filename from config
+        - if starts with underscore then append to basename otherwise use this name
+        :param cfgparam: config param var eg ROI_FILE as found in cfg and db
+        :param input: if this file is in the inputdir then true otherwise use outputdir
+        :return: full path filename
+        '''
+        filename = self.cfg[cfgparam]
+        if filename.startswith('_'):
+            filename = self.bname + filename
+        if input:
+            outputfile = join(self.inputdir,filename)
+        else:
+            outputfile = join(self.outputdir,filename)
+        return outputfile
 
     def run(self):
         """
         Insert and subtract bleachdata from data
         :return:
         """
+        # Load bleach data
+        bleachdatafile = self.getFilename('BLEACH_FILENAME', input=True)
+        if access(bleachdatafile,R_OK):
+            self.bleachdata = pd.read_csv(bleachdatafile, skip_blank_lines=True)
+            msg = "BLEACH: Data loaded  from %s" % bleachdatafile
+            self.logandprint(msg)
+        else:
+            raise IOError('Bleach data not accessible:', bleachdatafile)
         if not self.data.empty:
             #subtract per row
             hdrs = [h for h in self.data.columns if h.startswith('ROI')]
@@ -129,7 +146,7 @@ class Bleach(AutoData):
                 df_subtracted['Time'] = self.data['Time']
             traces = {'raw': self.data, 'bleach subtracted': df_subtracted}
             try:
-                outputfile = join(self.outputdir, self.bname + "_" + self.suffix)
+                outputfile = self.getFilename('EXPT_EXCEL')
                 self.outputExcelData(outputfile,traces)
                 msg = "Subtracted Data saved: %s" % outputfile
                 self.logandprint(msg)
@@ -177,9 +194,11 @@ def create_parser():
                  ''')
     parser.add_argument('--datafile', action='store', help='Data file', default="EXP44_Empty_Time Trace(s).csv")
     parser.add_argument('--bleachfile', action='store', help='Data file', default="Bleach Time Trace(s).csv")
-    parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Projects\\Anggono\\data")
-    parser.add_argument('--suffix', action='store', help='Output filename suffix', default="Processed.xlsx")
-    parser.add_argument('--roilist', action='store', help='Selected ROI list', default="*ROIlist.csv")
+    parser.add_argument('--outputdir', action='store', help='Output directory', default="C:\\Users\\lizcw\\Dropbox\\worktransfer\\Anggono\\hilary\\output")
+    parser.add_argument('--inputdir', action='store', help='Input directory',
+                        default="C:\\Users\\lizcw\\Dropbox\\worktransfer\\Anggono\\hilary")
+    parser.add_argument('--suffix', action='store', help='Output filename suffix', default="_Processed.xlsx")
+    parser.add_argument('--roilist', action='store', help='Selected ROI list', default="_ROIlist.csv")
 
     return parser
 
@@ -188,7 +207,7 @@ if __name__ == "__main__":
 
     parser = create_parser()
     args = parser.parse_args()
-    inputdir = args.outputdir
+    inputdir = args.inputdir
     datafiles = [join(inputdir, args.datafile),join(inputdir, args.bleachfile)]
 
     print("Input:", datafiles)

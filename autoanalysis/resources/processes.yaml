@@ -6,7 +6,7 @@ process1:
   filesin: DATA_FILENAME, BLEACH_FILENAME
   filesout: EXPT_EXCEL
   modulename: autoanalysis.processmodules.Bleach
-  classname: BleachAvg
+  classname: Bleach
 process2:
   caption: 2. Normalize Baseline
   href: baseline

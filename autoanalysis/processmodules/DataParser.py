@@ -10,12 +10,13 @@ Created on 7 Feb 2018
 
 import logging
 import pandas as pd
-from os.path import join, basename, splitext
+from os.path import join, basename, splitext, dirname
 
 
 class AutoData():
     def __init__(self, datafile, sheet=0, skiprows=0, headers=None):
         self.datafile = datafile
+        self.inputdir = dirname(self.datafile)
         (self.bname, self.extension) = splitext(basename(datafile))
         self.headers = headers
         self.sheet = sheet
