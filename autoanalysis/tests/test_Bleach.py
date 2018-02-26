@@ -18,7 +18,7 @@ class TestBleach(unittest.TestCase):
         # set values - this will be done from configdb
         cfg['EXPT_EXCEL'] = self.args.suffix
         self.mod.setConfigurables(cfg)
-        self.assertEqual(self.mod.suffix,self.args.suffix)
+        self.assertEqual(self.mod.cfg['EXPT_EXCEL'],self.args.suffix)
 
     def test_dataloaded(self):
         self.assertIsNotNone(self.mod.data)

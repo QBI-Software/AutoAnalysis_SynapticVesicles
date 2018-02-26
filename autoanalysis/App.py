@@ -423,9 +423,9 @@ class ProcessRunPanel(ProcessPanel):
         :return:
         """
         (count, row, i, total, process) = msg.data
-        print("\nProgress updated: ", time.ctime())
-        print('count = ', count)
         status = "%d of %d files " % (i, total)
+        msg = "\nProgress updated: %s count=%d status=%s" % (time.ctime(), count, status)
+        print(msg)
         if count == 0:
             self.m_dataViewListCtrlRunning.AppendItem([process, count, "Pending"])
             self.start[process] = time.time()

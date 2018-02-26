@@ -1,16 +1,16 @@
 process1:
   caption: 1. Bleach Averaging
   href: bleach
-  description: For each cell, subtract bleach average then generate plots vs time for selection
+  description: For each ROI, subtract bleach average then generate plots vs time. Manually select ROIs by editing ROI list output.
   output: local
-  filesin: DATA_FILENAME, BLEACH_FILENAME
-  filesout: EXPT_EXCEL
+  filesin: DATA_FILENAME
+  filesout: EXPT_EXCEL, ROI_FILE
   modulename: autoanalysis.processmodules.Bleach
   classname: Bleach
 process2:
   caption: 2. Normalize Baseline
   href: baseline
-  description: For each cell, normalize data to baseline from x frames before stimulus, divide by Max depletion then generate overlay of plots vs time (with Mean +- Std)
+  description: For each selected ROI, normalize data to baseline from x frames before stimulus, then divide by max depletion. Overlay of plots vs time (with Mean +- Std). Fit of mean to give Amplitude, Rise time (t), Decay time constant(t), Onset time(t).
   filesin: EXPT_EXCEL
   output: local
   filesout: EXPT_NORM

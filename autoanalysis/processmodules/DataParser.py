@@ -11,6 +11,7 @@ Created on 7 Feb 2018
 import logging
 import pandas as pd
 from os.path import join, basename, splitext, dirname
+from os import access,R_OK
 
 
 class AutoData():
@@ -34,22 +35,24 @@ class AutoData():
         """
         data = pd.DataFrame()
         try:
-            if '.xls' in self.extension:
-                if self.headers is None:
-                    data = pd.read_excel(self.datafile, skiprows=self.skiprows, sheet_name=self.sheet,skip_blank_lines=True)
+            if access(self.datafile,R_OK):
+                if '.xls' in self.extension:
+                    if self.headers is None:
+                        data = pd.read_excel(self.datafile, skiprows=self.skiprows, sheet_name=self.sheet,skip_blank_lines=True)
+                    else:
+                        data = pd.read_excel(self.datafile, skiprows=self.skiprows, sheet_name=self.sheet,skip_blank_lines=True, header=self.headers)
+                elif self.extension == '.csv':
+                    data = pd.read_csv(self.datafile, skip_blank_lines=True)
+                # Check loaded
+                if data.empty:
+                    raise ValueError("Data not loaded - check datafile")
                 else:
-                    data = pd.read_excel(self.datafile, skiprows=self.skiprows, sheet_name=self.sheet,skip_blank_lines=True, header=self.headers)
-            elif self.extension == '.csv':
-                data = pd.read_csv(self.datafile, skip_blank_lines=True)
-            # Check loaded
-            if data.empty:
-                raise ValueError("Data not loaded - check datafile")
+                    msg = "... load complete"
+                    self.logandprint(msg)
             else:
-                msg = "... load complete"
-                self.logandprint(msg)
+                raise IOError("ERROR: Cannot access datafile:", self.datafile)
         except Exception as e:
-            print(e)
-            logging.error(e)
+            raise e
         return data
 
 

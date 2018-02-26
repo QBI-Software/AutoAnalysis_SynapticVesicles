@@ -27,6 +27,11 @@ from autoanalysis.processmodules.DataParser import AutoData
 import plotly.graph_objs as go
 from plotly import tools
 from plotly import offline
+from scipy.optimize import curve_fit
+# MatPlotlib
+import matplotlib.pyplot as plt
+from matplotlib import pylab
+
 
 
 class Normalized(AutoData):
@@ -35,19 +40,26 @@ class Normalized(AutoData):
     """
     def __init__(self, datafile,outputdir, sheet=0, skiprows=0, headers=None, showplots=False):
         # Load data
-        sheet =1
-        super().__init__(datafile, sheet, skiprows, headers)
-        msg = "BASELINE: Subtracted Data loaded from %s" % self.datafile
-        self.logandprint(msg)
-        self.sheet=0
-        self.rawdata = self.load_data()
-        msg = "BLEACH: Raw Data loaded  from %s" % self.datafile
-        self.logandprint(msg)
-        # Output
-        self.outputdir = outputdir
-        self.showplots = showplots
-        # Set config defaults
-        self.cfg = self.getConfigurables()
+        try:
+            sheet = 'bleach subtracted'
+            super().__init__(datafile, sheet, skiprows, headers)
+            msg = "BASELINE: Subtracted Data loaded from %s" % self.datafile
+            self.logandprint(msg)
+            self.sheet='raw'
+            self.rawdata = self.load_data()
+            msg = "BASELINE: Raw Data loaded  from %s" % self.datafile
+            self.logandprint(msg)
+            # Output
+            self.outputdir = outputdir
+            self.showplots = showplots
+            # Set config defaults
+            self.cfg = self.getConfigurables()
+        except IOError as e:
+            self.logandprint(e.args[0])
+            raise e
+        except Exception as e:
+            self.logandprint(e.args[0])
+            raise e
 
     def getConfigurables(self):
         '''
@@ -57,11 +69,14 @@ class Normalized(AutoData):
         cfg = OrderedDict()
         cfg['EXPT_EXCEL'] = '_Processed.xlsx'
         cfg['EXPT_NORM'] = '_Normalized.xlsx'
-        cfg['ROI_FILE'] = "_ROIlist.csv"
+        #cfg['ROI_FILE'] = "_ROIlist.csv"
+        cfg['SELECTED_ROIS'] = "_ROIlist_selected.csv"
         cfg['STIM_BELOW'] = 10
         cfg['STIM_ABOVE'] = 0
         cfg['MAX_BELOW'] = 5
         cfg['MAX_ABOVE'] = 6
+        cfg['FIT_DECAY_PERIOD']=0.75 # Use 75% of trace for fitting decay
+
         return cfg
 
     def setConfigurables(self,cfg):
@@ -76,6 +91,14 @@ class Normalized(AutoData):
             self.cfg[cf] = cfg[cf]
         self.logandprint("Config loaded")
 
+    def getRootBasename(self):
+        rootbname = self.bname
+        if self.cfg is not None and 'EXPT_EXCEL' in self.cfg.keys():
+            suffix = self.cfg['EXPT_EXCEL'].split(".")
+            if suffix[0] in rootbname:
+                rootbname=rootbname.replace(suffix[0],'')
+        return rootbname
+
     def getFilename(self, cfgparam):
         '''
         Compile filename from config
@@ -85,7 +108,7 @@ class Normalized(AutoData):
         '''
         filename = self.cfg[cfgparam]
         if filename.startswith('_'):
-            filename = self.bname + filename
+            filename = self.getRootBasename() + filename
         outputfile = join(self.outputdir,filename)
         return outputfile
 
@@ -118,7 +141,7 @@ class Normalized(AutoData):
         offline.plot(fig, filename=outputfile)
         return fig
 
-    def generateOverlay(self, xt, df, title, outputfile):
+    def generateOverlay(self, xt, df, title, outputfile, df_fit=None):
         # Scatter plots
         data = []
 
@@ -144,6 +167,15 @@ class Normalized(AutoData):
                         name=col,
                         mode='lines+markers'
                     ))
+        if df_fit is not None:
+            data.append(go.Scatter(
+                x=df_fit['x'].values,
+                y=df_fit['y_fit'].values,
+                name='Fit decay',
+                line=dict(
+                    color=('rgb(229, 61, 89)'),
+                    width=3)
+            ))
         layout = dict(title=title,
                       xaxis=dict(title='Time(s)'),
                       yaxis=dict(title='Signal'),
@@ -156,14 +188,22 @@ class Normalized(AutoData):
     def loadROIlist(self,roifile):
         try:
             access(roifile,R_OK)
-            df_rois = pd.read_csv(roifile)
-            df_rois.columns = ['ROI', 'SELECTED']
+            df_rois = pd.read_csv(roifile, header=None)
+            if len(df_rois.columns)== 2:
+                df_rois.columns = ['ROI', 'SELECTED']
+                df_rois_selected = df_rois[df_rois['SELECTED'] == 'y']
+                roilist = df_rois_selected['ROI'].tolist()
+            else:
+                df_rois.columns = ['ROI']
+                roilist = df_rois['ROI'].tolist()
+
             msg = "ROI list loaded: %s" % roifile
             self.logandprint(msg)
-            df_rois_selected = df_rois[df_rois['SELECTED']=='y']
+
         except Exception as e:
             raise e
-        return df_rois_selected['ROI'].tolist()
+
+        return roilist
 
     def getStimulusIndex(self):
         """
@@ -172,10 +212,12 @@ class Normalized(AutoData):
         """
         idx = 0
         if self.rawdata is not None:
-            stims = [str(x) for x in self.rawdata['Frame'] if x.startswith('STIM')]
+            stims = [str(x) for x in self.rawdata['Frame'] if str(x).startswith('STIM')]
+            if len(stims) <=0:
+                raise ValueError("STIM not found - not indicated in file")
             idx = self.rawdata[self.rawdata['Frame'].isin(stims)].index.values[0]
         else:
-            raise ValueError("STIM not found")
+            raise ValueError("STIM not found - no Raw data loaded")
         return idx
 
     def getMaxIndex(self, df_norm):
@@ -221,6 +263,40 @@ class Normalized(AutoData):
         col = col/avg
         return col
 
+    def exp_func(self,x, a, b, c):
+        return a * np.exp(-b * x) + c
+
+    def fitDecay(self,xdata,ydata, period=0.75):
+        """
+        Estimate expt period as first 75% of trace then fit decay to zero
+        :param xdata:
+        :param ydata:
+        :return: decay rate (tau)
+        """
+        expt_period = int(round(len(ydata) * period, 0))
+        peak = np.max(ydata[0:expt_period])
+        peak_idx = ydata[ydata==peak].index.values[0]
+        x = xdata[peak_idx:expt_period]
+        y = ydata[peak_idx:expt_period]
+        popt, pcov = curve_fit(self.exp_func, x, y, p0=(peak, 1e-6, 0))
+        plt.plot(x, y, 'o', x, self.exp_func(x, *popt))
+        tau = 1/popt[1]
+        print("Estimated amplitude: ", peak, " tau: ", tau)
+        df = pd.DataFrame.from_dict({'x': x, 'y': y, 'y_fit': self.exp_func(x, *popt)})
+        return (peak,tau,df )
+
+    def fitPolynomial(self, xdata, ydata,deg=3):
+        """
+        Estimate polynomial fits of data - ?useful
+        #matplotlib
+        #plt.plot(xdata, ydata, '.', xdata, p(xdata), 'c-')
+        :param xdata: time
+        :param ydata: ydata
+        :param deg: degrees of fit - higher is more curves but closer fits
+        :return:
+        """
+        p = np.poly1d(np.polyfit(xdata, ydata, deg))
+        return p(xdata)
 
 
     def run(self):
@@ -230,31 +306,41 @@ class Normalized(AutoData):
         """
         if not self.data.empty:
             #Get selected ROIs from list
-            roilist = self.loadROIlist(self.getFilename('ROI_FILE'))
+            roilist = self.loadROIlist(self.getFilename('SELECTED_ROIS'))
             df_selected = self.data[roilist]
             # Normalize to baseline
             #Get stimulus index
             stimidx = self.getStimulusIndex()
             #Average 10 frames before stim for each ROI and subtract
-            df_norm = df_selected.apply(lambda col: self.subtractAvg(col,stimidx,cfg['STIM_BELOW'],cfg['STIM_ABOVE']))
+            df_norm = df_selected.apply(lambda col: self.subtractAvg(col,stimidx,
+                                        int(self.cfg['STIM_BELOW']),int(self.cfg['STIM_ABOVE'])))
             print("Normalized data: \n", df_norm)
             # Find max in normalized data
-            df_max = df_norm.apply(lambda col: self.divideMaxAvg(col,cfg['MAX_BELOW'],cfg['MAX_ABOVE']))
+            df_max = df_norm.apply(lambda col: self.divideMaxAvg(col,int(self.cfg['MAX_BELOW']),int(self.cfg['MAX_ABOVE'])))
             # Add Average data
             df_max['Average'] = df_max.mean(axis=1)
             df_max['SD'] = df_max.std(axis=1)
+            # Fit decay to average
+            xdata = self.rawdata['Time']
+            ydata = df_max['Average']
+            sd = df_max['SD']
+            period = float(self.cfg['FIT_DECAY_PERIOD'])
+            (amplitude,tau, df_fit) = self.fitDecay(xdata,ydata,period)
+
             # Save data
-            all={'raw': self.rawdata, 'bleach subtracted': self.data, 'normalized': df_norm, 'max_depleted':df_max}
+            all={'raw': self.rawdata, 'bleach subtracted': self.data, 'normalized': df_norm, 'max_depleted':df_max, 'fit_decay': df_fit}
             outputfile = self.getFilename('EXPT_NORM')
             self.outputExcelData(outputfile, all)
             print('Normalized data saved to: ', outputfile)
             #Plot overlay
             if self.showplots:
                 title = self.bname + ': ROIs normalized baseline and max depleted'
+                if tau is not None:
+                    title += ' [Fit amplitude=%0.2f tau=%0.4f]' % (amplitude,tau)
                 plotfilename = outputfile.replace('.xlsx', '.html')
                 if 'Time' in self.data.columns:
                     xt = self.data['Time']
-                    self.generateOverlay(xt,df_max, title, plotfilename)
+                    self.generateOverlay(xt,df_max, title, plotfilename, df_fit)
         else:
             print("No data found: ", self.datafile)
 
@@ -270,11 +356,15 @@ def create_parser():
                 Reads bleach data and subtracts from data with output to Excel
 
                  ''')
-    parser.add_argument('--datafile', action='store', help='Data file', default="EXP44_Empty_Time Trace(s)_Processed.xlsx")
-    parser.add_argument('--suffix', action='store', help='Output filename suffix', default="Processed.xlsx")
+    parser.add_argument('--datafile', action='store', help='Data file', default="EXP44 Time Trace(s)_Processed.xlsx")
+    parser.add_argument('--suffix', action='store', help='Output filename suffix', default="_Normalized.xlsx")
     parser.add_argument('--roifile', action='store', help='ROI list', default="_ROIlist_selected.csv")
-    parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Projects\\Anggono\\data")
-
+    parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Dropbox\\worktransfer\\Anggono\\hilary\\batchoutput")
+    parser.add_argument('--stimbelow', action='store',default=10)
+    parser.add_argument('--stimabove', action='store', default=0)
+    parser.add_argument('--maxbelow', action='store', default=5)
+    parser.add_argument('--maxabove', action='store', default=6)
+    parser.add_argument('--period', action='store', default=0.75)
 
     return parser
 
@@ -295,8 +385,14 @@ if __name__ == "__main__":
         for c in cfg.keys():
             print("config set: ",c,"=", cfg[c])
         #set values - this will be done from configdb
-        cfg['EXPT_EXCEL'] = args.suffix
-        cfg['ROI_FILE'] = args.roifile
+        cfg['EXPT_EXCEL'] = "_" + args.datafile.split("_")[-1] #_Processed.xlsx
+        cfg['EXPT_NORM'] = args.suffix
+        cfg['SELECTED_ROIS'] = args.roifile
+        cfg['STIM_BELOW'] = args.stimbelow
+        cfg['STIM_ABOVE'] = args.stimabove
+        cfg['MAX_BELOW'] = args.maxbelow
+        cfg['MAX_ABOVE'] = args.maxabove
+        cfg['FIT_DECAY_PERIOD'] = args.period
         mod.setConfigurables(cfg)
         if mod.data is not None:
             mod.run()

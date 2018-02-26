@@ -35,14 +35,23 @@ class Bleach(AutoData):
     """
     def __init__(self, datafile,outputdir, sheet=0, skiprows=0, headers=None, showplots=False):
         # Load data
-        super().__init__(datafile, sheet, skiprows, headers)
-        msg = "BLEACH: Data loaded from %s" % self.datafile
-        self.logandprint(msg)
-        # Output
-        self.outputdir = outputdir
-        self.showplots = showplots
-        # Set config defaults
-        self.cfg = self.getConfigurables()
+        try:
+            super().__init__(datafile, sheet, skiprows, headers)
+            #remove any extra lines
+            self.data = self.data.dropna()
+            msg = "BLEACH: Data loaded from %s" % self.datafile
+            self.logandprint(msg)
+            # Output
+            self.outputdir = outputdir
+            self.showplots = showplots
+            # Set config defaults
+            self.cfg = self.getConfigurables()
+        except IOError as e:
+            self.logandprint(e.args[0])
+            raise e
+        except Exception as e:
+            self.logandprint(e.args[0])
+            raise e
 
     def getConfigurables(self):
         '''
@@ -192,11 +201,11 @@ def create_parser():
                 Reads bleach data and subtracts from data with output to Excel
 
                  ''')
-    parser.add_argument('--datafile', action='store', help='Data file', default="EXP44_Empty_Time Trace(s).csv")
+    parser.add_argument('--datafile', action='store', help='Data file', default="EXP44 Time Trace(s).csv")
     parser.add_argument('--bleachfile', action='store', help='Data file', default="Bleach Time Trace(s).csv")
-    parser.add_argument('--outputdir', action='store', help='Output directory', default="C:\\Users\\lizcw\\Dropbox\\worktransfer\\Anggono\\hilary\\output")
+    parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Dropbox\\worktransfer\\Anggono\\hilary\\batchoutput")
     parser.add_argument('--inputdir', action='store', help='Input directory',
-                        default="C:\\Users\\lizcw\\Dropbox\\worktransfer\\Anggono\\hilary")
+                        default="D:\\Dropbox\\worktransfer\\Anggono\\hilary\\input")
     parser.add_argument('--suffix', action='store', help='Output filename suffix', default="_Processed.xlsx")
     parser.add_argument('--roilist', action='store', help='Selected ROI list', default="_ROIlist.csv")
 
@@ -208,23 +217,24 @@ if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
     inputdir = args.inputdir
-    datafiles = [join(inputdir, args.datafile),join(inputdir, args.bleachfile)]
+    datafile = join(inputdir, args.datafile)
 
-    print("Input:", datafiles)
+    print("Input:", datafile)
     print("Output:", args.outputdir)
 
     try:
-        mod = Bleach(datafiles, args.outputdir,showplots=True)
+        mod = Bleach(datafile, args.outputdir,showplots=True)
         cfg = mod.getConfigurables()
         for c in cfg.keys():
             print("config set: ",c,"=", cfg[c])
         #set values - this will be done from configdb
         cfg['EXPT_EXCEL']=args.suffix
         cfg['ROI_FILE'] = args.roilist
+        cfg['BLEACH_FILENAME'] = args.bleachfile
         mod.setConfigurables(cfg)
         if mod.data is not None:
             mod.run()
 
     except Exception as e:
-        print("Error: ", e)
+        print(e)
 

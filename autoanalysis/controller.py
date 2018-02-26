@@ -60,7 +60,7 @@ def CheckFilenames(filenames, configfiles):
     """
     newfiles = {k: [] for k in filenames.keys() }
     for conf in configfiles:
-        if conf.startswith('*'):
+        if conf.startswith('_'):
             conf = conf[1:]
         for group in filenames.keys():
             for f in filenames[group]:
@@ -71,8 +71,7 @@ def CheckFilenames(filenames, configfiles):
                     # extract directory and seek files
                     newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', conf), recursive=True)]
                     if len(newfiles[group]) <=0:
-                        newfiles[group] = newfiles[group] + [y for y in
-                                                             iglob(join(parts[0], '**', '*'+conf), recursive=True)]
+                        newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', '*'+conf), recursive=True)]
 
     # if self.filesIn is not None:
     #     checkedfilenames = CheckFilenames(self.filenames, self.filesIn)
@@ -200,7 +199,7 @@ class ProcessThread(threading.Thread):
                     if group == 'all' or len(self.filenames[group])<=0:
                         continue
                     count = (i/ total_files )* 100
-                    msg = "%s run: count=%d of %d (%d percent)" % (self.processname, i, total_files, count)
+                    msg = "PROCESS THREAD (batch):%s run: count=%d of %d (%d percent)" % (self.processname, i, total_files, count)
                     print(msg)
                     logger.info(msg)
                     #TODO fix this
@@ -214,7 +213,7 @@ class ProcessThread(threading.Thread):
                 total_files = len(files)
                 for i in range(total_files):
                     count = (i/ total_files )* 100
-                    msg = "%s run: count=%d of %d (%d percent)" % (self.processname, i, total_files, count)
+                    msg = "PROCESS THREAD: %s run: count=%d of %d (%d percent)" % (self.processname, i, total_files, count)
                     print(msg)
                     logger.info(msg)
                     #wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))
@@ -243,7 +242,11 @@ class ProcessThread(threading.Thread):
         logger.info("Process Data with file: %s", filename)
         # create local subdir for output
         if self.output == 'local':
-            outputdir = join(dirname(filename), 'processed')
+            inputdir = dirname(filename)
+            if 'processed' in inputdir:
+                outputdir = inputdir
+            else:
+                outputdir = join(inputdir, 'processed')
             if not exists(outputdir):
                 mkdir(outputdir)
         else:
@@ -251,12 +254,7 @@ class ProcessThread(threading.Thread):
         # Instantiate module
         module = importlib.import_module(self.module_name)
         class_ = getattr(module, self.class_name)
-        for fconf in ['SHEET','SKIPROWS','HEADERS']:
-            if fconf not in self.config.keys():
-                self.config[fconf]=0
-        mod = class_(filename, outputdir, sheet=self.config['SHEET'],
-                     skiprows=self.config['SKIPROWS'],
-                     headers=self.config['HEADERS'],showplots=self.showplots)
+        mod = class_(filename, outputdir, showplots=self.showplots)
         # Load all params required for module - get list from module
         cfg = mod.getConfigurables()
         for c in cfg.keys():
