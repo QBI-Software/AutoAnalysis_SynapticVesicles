@@ -1,7 +1,7 @@
 process1:
   caption: 1. Bleach Averaging
   href: bleach
-  description: For each ROI, subtract bleach average then generate plots vs time. Manually select ROIs by editing ROI list output.
+  description: Requires a bleach.csv file in the same directory as the data file. The data file must have the Time and Frame columns included with "STIM_x" marked in the Frame column indicating the stimulus time. For each ROI, this process subtracts bleach average then generate plots vs time as interactive html. Outputs an excel file and ROI list (to be selected for next step).
   output: local
   filesin: DATA_FILENAME
   filesout: EXPT_EXCEL, ROI_FILE
@@ -10,7 +10,7 @@ process1:
 process2:
   caption: 2. Normalize Baseline
   href: baseline
-  description: For each selected ROI, normalize data to baseline from x frames before stimulus, then divide by max depletion. Overlay of plots vs time (with Mean +- Std). Fit of mean to give Amplitude, Rise time (t), Decay time constant(t), Onset time(t).
+  description: Sequential to Bleach step. Select required ROIs and save to new list (selected ROIs) in the same directory before running. For each ROI in the selected list, the process normalizes data to baseline from x frames before (and/or after) stimulus, then divides by the mean max depletion value (x rows before/after max) - where x is set in configuration panel (STIM_BEFORE, STIM_AFTER, MAX_BEFORE, MAX_AFTER). Generates an overlay of all plots vs time (with Average +/- Std). Fit of average to give Amplitude and Decay time constant(t). Outputs all data to an excel file.
   filesin: EXPT_EXCEL
   output: local
   filesout: EXPT_NORM

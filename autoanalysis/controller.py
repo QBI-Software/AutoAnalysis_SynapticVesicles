@@ -60,18 +60,20 @@ def CheckFilenames(filenames, configfiles):
     """
     newfiles = {k: [] for k in filenames.keys() }
     for conf in configfiles:
-        if conf.startswith('_'):
-            conf = conf[1:]
+        # if conf.startswith('_'):
+        #     conf = conf[1:]
         for group in filenames.keys():
             for f in filenames[group]:
                 parts = split(f)
                 if conf in parts[1]:
                     newfiles[group].append(f)
+                elif conf.startswith('_'):
+                    newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', '*' + conf), recursive=True)]
                 else:
                     # extract directory and seek files
                     newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', conf), recursive=True)]
-                    if len(newfiles[group]) <=0:
-                        newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', '*'+conf), recursive=True)]
+
+
 
     # if self.filesIn is not None:
     #     checkedfilenames = CheckFilenames(self.filenames, self.filesIn)
@@ -212,8 +214,8 @@ class ProcessThread(threading.Thread):
                 files = self.filenames
                 total_files = len(files)
                 for i in range(total_files):
-                    count = (i/ total_files )* 100
-                    msg = "PROCESS THREAD: %s run: count=%d of %d (%d percent)" % (self.processname, i, total_files, count)
+                    count = (i+1/ total_files )* 100
+                    msg = "PROCESS THREAD: %s run: count=%d of %d (%d percent)" % (self.processname, i+1, total_files, count)
                     print(msg)
                     logger.info(msg)
                     #wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))

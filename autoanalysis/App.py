@@ -16,25 +16,26 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-paper')
 import wx
 import wx.html2
-from os.path import abspath, dirname
-import glob
+from os.path import abspath, dirname, commonpath
+from glob import iglob
 from configobj import ConfigObj
 from autoanalysis.controller import EVT_RESULT, Controller
 from autoanalysis.gui.appgui import ConfigPanel, FilesPanel, WelcomePanel, ProcessPanel,dlgLogViewer
 
-__version__ = '0.0.0'
+__version__ = '0.1.0'
 
 
 ##### Global functions
 def findResourceDir():
-    resource_dir = glob.glob(join(dirname(__file__), "resources"))
-    middir = ".."
-    ctr = 1
-    while len(resource_dir) <= 0 and ctr < 5:
-        resource_dir = glob.glob(join(dirname(__file__), middir, "resources"))
-        middir = join(middir, "..")
-        ctr += 1
-    return abspath(resource_dir[0])
+    allfiles = [y for y in iglob(join('.', '**', "resources"), recursive=True)]
+    files = [f for f in allfiles if not 'build' in f]
+    resource_dir = commonpath(files)
+    if len(resource_dir) > 0:
+        print("Resource directory located to: ", resource_dir)
+    else:
+        resource_dir =join('autoanalysis','resources')
+
+    return abspath(resource_dir)
 
 
 ########################################################################
@@ -91,16 +92,9 @@ class HomePanel(WelcomePanel):
             r"Each process is described with the required input files (which need to be available in the input directory structure) and the output files which it produces. These are multi-threaded processes which will run in sequence as listed and once running their progress can be monitored. A log file is produced in the user's home directory. Interactive plots can also be produced during processing.")
         # self.m_richText1.EndLeftIndent()
         self.m_richText1.Newline()
-        self.m_richText1.BeginBold()
-        self.m_richText1.WriteText("Compare Groups")
-        self.m_richText1.EndBold()
-        # self.m_richText1.BeginLeftIndent(20)
-        self.m_richText1.Newline()
-        self.m_richText1.WriteText(
-            "Once the appropriate files have been generated in the output folder, a statistical comparison of two groups can be run and an interactive plot generated.")
         self.m_richText1.BeginItalic()
         self.m_richText1.AddParagraph(
-            r"Copyright (2017) https://github.com/QBI-Software/MSDAnalysis")
+            r"Copyright (2017) https://github.com/QBI-Software/AutoAnalysis_SynapticVesicles")
         self.m_richText1.EndItalic()
 
     def loadController(self):
