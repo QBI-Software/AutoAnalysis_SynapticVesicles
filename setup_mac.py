@@ -9,7 +9,7 @@ from plistlib import Plist
 from os.path import join
 import sys
 from autoanalysis.App import __version__
-application_title = 'QBI Auto Analysis - Synaptic Vesicles'
+application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('autoanalysis','App.py')
 venvpython = join(sys.prefix,'Lib','site-packages')
 mainpython = "D:\\Programs\\Python36"

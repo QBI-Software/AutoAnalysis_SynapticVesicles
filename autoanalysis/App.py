@@ -48,10 +48,10 @@ class HomePanel(WelcomePanel):
     def __init__(self, parent):
         super(HomePanel, self).__init__(parent)
         img = wx.Bitmap(1, 1)
-        img.LoadFile(join(findResourceDir(), 'app_design.bmp'), wx.BITMAP_TYPE_BMP)
+        img.LoadFile(join(findResourceDir(), 'newplot.bmp'), wx.BITMAP_TYPE_BMP)
 
         self.m_richText1.BeginFontSize(14)
-        welcome = "Welcome to the Automated Analysis App (v.%s)" % __version__
+        welcome = "Welcome to the Automated Analysis App for Synaptic Vesicles data (v.%s)" % __version__
         self.m_richText1.WriteText(welcome)
         self.m_richText1.EndFontSize()
         self.m_richText1.Newline()
@@ -73,7 +73,7 @@ class HomePanel(WelcomePanel):
         self.m_richText1.Newline()
         # self.m_richText1.BeginLeftIndent(20)
         self.m_richText1.WriteText(
-            'All filenames, column names, groups, threshold and binwidth options can be specifically configured and multiple configurations saved and reloaded.')
+            'All filenames, groups, averaging options can be specifically configured and multiple configurations saved and reloaded.')
         self.m_richText1.Newline()
         self.m_richText1.BeginBold()
         self.m_richText1.WriteText("Select Files")
@@ -81,7 +81,7 @@ class HomePanel(WelcomePanel):
         # self.m_richText1.BeginLeftIndent(20)
         self.m_richText1.Newline()
         self.m_richText1.WriteText(
-            "Select a top level directory containing the required data files and/or use the Drag'n'Drop for individual files. Only files checked in the file list will be included in the analysis. Compiled output will be put in the output directory whereas individually processed files will be put in a subfolder in the input directory structure. It is recommended to provide a prefix (which should be a known search text) to group experiments for later comparison.")
+            "Select a top level directory containing the required data files and/or use the Drag'n'Drop for individual files. Only files checked in the file list will be included in the analysis. Output files will be put in a subfolder called 'processed' in the input directory structure. The datafile prefix will be used for all output files.")
         self.m_richText1.Newline()
         self.m_richText1.BeginBold()
         self.m_richText1.WriteText("Run Processes")
@@ -89,7 +89,7 @@ class HomePanel(WelcomePanel):
         # self.m_richText1.BeginLeftIndent(20)
         self.m_richText1.Newline()
         self.m_richText1.WriteText(
-            r"Each process is described with the required input files (which need to be available in the input directory structure) and the output files which it produces. These are multi-threaded processes which will run in sequence as listed and once running their progress can be monitored. A log file is produced in the user's home directory. Interactive plots can also be produced during processing.")
+            r"Each process is described with the required input files (which need to be available in the input directory structure) and the output files which it produces. These are multi-threaded processes which will run in sequence as listed and once running their progress can be monitored. A log file is produced which can be viewed in a popup. Interactive plots may also be produced during processing.")
         # self.m_richText1.EndLeftIndent()
         self.m_richText1.Newline()
         self.m_richText1.BeginItalic()

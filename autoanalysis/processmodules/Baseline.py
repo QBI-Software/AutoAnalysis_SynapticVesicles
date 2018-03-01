@@ -314,7 +314,7 @@ class Normalized(AutoData):
             #Average 10 frames before stim for each ROI and subtract
             df_norm = df_selected.apply(lambda col: self.subtractAvg(col,stimidx,
                                         int(self.cfg['STIM_BELOW']),int(self.cfg['STIM_ABOVE'])))
-            print("Normalized data: \n", df_norm)
+            #print("Normalized data: \n", df_norm)
             # Find max in normalized data
             df_max = df_norm.apply(lambda col: self.divideMaxAvg(col,int(self.cfg['MAX_BELOW']),int(self.cfg['MAX_ABOVE'])))
             # Add Average data

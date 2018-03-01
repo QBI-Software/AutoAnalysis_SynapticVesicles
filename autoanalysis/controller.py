@@ -65,10 +65,11 @@ def CheckFilenames(filenames, configfiles):
         for group in filenames.keys():
             for f in filenames[group]:
                 parts = split(f)
-                if conf in parts[1]:
+                if conf in parts[1] or conf[1:] in parts[1]:
                     newfiles[group].append(f)
                 elif conf.startswith('_'):
-                    newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', '*' + conf), recursive=True)]
+                    c = conf[1:]
+                    newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', '*' + c), recursive=True)]
                 else:
                     # extract directory and seek files
                     newfiles[group] = newfiles[group] + [y for y in iglob(join(parts[0], '**', conf), recursive=True)]
