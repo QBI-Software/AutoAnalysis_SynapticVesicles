@@ -71,11 +71,11 @@ setup(
     maintainer_email='qbi-dev-admin@uq.edu.au',
     url='http://github.com/QBI-Software/AutoAnalysis_SynapticVesicles',
     license='GNU General Public License (GPL)',
-    options={'build_exe': build_exe_options, },workdir=".",
+    options={'build_exe': build_exe_options, },
     executables=[Executable(main_python_file,
                             base=base,
                             targetName='autoanalysis_sv.exe',
-                            icon='autoanalysis/resources/measure.ico',
+                            icon='autoanalysis/resources/newplot.ico',
                             shortcutName=application_title,
                             shortcutDir='DesktopFolder'
                             )]
