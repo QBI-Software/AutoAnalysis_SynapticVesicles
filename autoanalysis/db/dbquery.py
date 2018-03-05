@@ -28,8 +28,23 @@ class DBI():
             self.getconn()
         self.c.execute("SELECT * FROM config WHERE configid=?",(configid,))
         config = {}
-        for k,val,gp in self.c.fetchall():
+        for k,val,gp,desc in self.c.fetchall():
             config[k] = val
+        if len(config)<=0:
+            config = None
+        return config
+
+    def getConfigALL(self, configid):
+        """
+        Get full dict of config for that configid/group
+        :return: name=[value,description] or None
+        """
+        if self.c is None:
+            self.getconn()
+        self.c.execute("SELECT * FROM config WHERE configid=?",(configid,))
+        config = {}
+        for k,val,gp,desc in self.c.fetchall():
+            config[k] = [val,desc]
         if len(config)<=0:
             config = None
         return config
@@ -58,7 +73,7 @@ class DBI():
         cids = self.getConfigIds()
         if configid in cids:
             self.deleteConfig(configid)
-        cnt = self.c.executemany('INSERT INTO config VALUES(?,?,?)', idlist).rowcount
+        cnt = self.c.executemany('INSERT INTO config VALUES(?,?,?,?)', idlist).rowcount
         self.conn.commit()
         #self.conn.close()
         return cnt

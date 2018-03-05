@@ -15,20 +15,26 @@ class TestDBquery(unittest.TestCase):
         self.dbi.conn.close()
 
     def test_getConfig(self):
-        configid = 'general'
+        configid = 'test'
         data = self.dbi.getConfig(configid)
         expected = 0
         self.assertGreater(len(data),expected)
 
+    def test_getConfigALL(self):
+        configid = 'test'
+        data = self.dbi.getConfigALL(configid)
+        expected = 0
+        self.assertGreater(len(data),expected)
+
     def test_getConfigByName(self):
-        group = 'general'
+        group = 'test'
         test = 'BINWIDTH'
-        expected = 10
+        expected = 20
         data = self.dbi.getConfigByName(group,test)
         self.assertEqual(int(data),expected)
 
     def test_getConfigByName_None(self):
-        group = 'general'
+        group = 'test'
         test = 'BINW'
         expected = None
         data = self.dbi.getConfigByName(group,test)
@@ -40,22 +46,31 @@ class TestDBquery(unittest.TestCase):
         self.assertGreater(len(data),0)
 
     def test_updateConfig(self):
-        configid='general'
-        configlist = [('BINWIDTH',10,'general'),('COLUMN','TestData','general'),('MINRANGE',0,'general'),('MAXRANGE',100,'general')]
+        configid='test'
+        configlist = [('BINWIDTH',10,'test',"Bin width for histograms"),
+                      ('COLUMN','TestData','test',"Column name for histograms"),
+                      ('MINRANGE',0,'test',"Minimum range of histograms bins"),
+                      ('MAXRANGE',100,'test',"Maximum range of histograms bins")]
         cnt = self.dbi.addConfig(configid,configlist)
         expected = len(configlist)
         self.assertEqual(expected,cnt)
 
     def test_updateConfig_Secondset(self):
         configid = 'test'
-        configlist = [('BINWIDTH', 10, configid), ('COLUMN', 'TestData', configid), ('MINRANGE', 0, configid),('MAXRANGE', 100, configid)]
+        configlist = [('BINWIDTH', 10, configid,"Bin width for histograms"),
+                      ('COLUMN', 'TestData', configid,"Column name for histograms"),
+                      ('MINRANGE', 0, configid,"Minimum range of histograms bins"),
+                      ('MAXRANGE', 100, configid,"Maximum range of histograms bins")]
         cnt = self.dbi.addConfig(configid, configlist)
         expected = len(configlist)
         self.assertEqual(expected, cnt)
 
     def test_updateConfig_duplicate(self):
-        configid='general'
-        configlist = [('BINWIDTH',20,'general'),('COLUMN','TestData2','general'),('MINRANGE',0,'general'),('MAXRANGE',100,'general')]
+        configid='test'
+        configlist = [('BINWIDTH', 20, 'test', "Bin width for histograms"),
+                      ('COLUMN', 'TestData2', 'test', "Column name for histograms"),
+                      ('MINRANGE', 5, 'test', "Minimum range of histograms bins"),
+                      ('MAXRANGE', 50, 'test', "Maximum range of histograms bins")]
         cnt = self.dbi.addConfig(configid,configlist)
         expected = len(configlist)
         self.assertEqual(expected,cnt)

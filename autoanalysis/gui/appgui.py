@@ -10,8 +10,8 @@
 import wx
 import wx.xrc
 import wx.grid
-import wx.dataview
 import wx.richtext
+import wx.dataview
 
 ###########################################################################
 ## Class ConfigPanel
@@ -33,8 +33,8 @@ class ConfigPanel ( wx.Panel ):
 		self.m_staticline14 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
 		bSizer17.Add( self.m_staticline14, 0, wx.EXPAND |wx.ALL, 5 )
 		
-		self.m_status = wx.StaticText( self, wx.ID_ANY, u"Settings for processing scripts (multiple configs possible)", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_status.Wrap( -1 )
+		self.m_status = wx.StaticText( self, wx.ID_ANY, u"These variables are required by the processing modules (change only the value not the name).  Multiple configs are possible by typing a new name in the dropdown and clicking Save Changes.", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_status.Wrap( 600 )
 		self.m_status.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 71, 93, 90, False, wx.EmptyString ) )
 		
 		bSizer17.Add( self.m_status, 0, wx.ALL, 5 )
@@ -58,7 +58,7 @@ class ConfigPanel ( wx.Panel ):
 		self.m_grid1 = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		
 		# Grid
-		self.m_grid1.CreateGrid( 20, 2 )
+		self.m_grid1.CreateGrid( 20, 3 )
 		self.m_grid1.EnableEditing( True )
 		self.m_grid1.EnableGridLines( True )
 		self.m_grid1.EnableDragGridSize( True )
@@ -70,6 +70,7 @@ class ConfigPanel ( wx.Panel ):
 		self.m_grid1.SetColLabelSize( 50 )
 		self.m_grid1.SetColLabelValue( 0, u"Name" )
 		self.m_grid1.SetColLabelValue( 1, u"Value" )
+		self.m_grid1.SetColLabelValue( 2, u"Description" )
 		self.m_grid1.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
 		
 		# Rows
@@ -156,11 +157,10 @@ class ProcessPanel ( wx.Panel ):
 		
 		bSizer15.Add( self.m_stTitle, 0, wx.ALL, 5 )
 		
-		self.m_stDescription = wx.StaticText( self, wx.ID_ANY, u"Process Description", wx.DefaultPosition, wx.Size( -1,80 ), 0|wx.FULL_REPAINT_ON_RESIZE|wx.VSCROLL )
-		self.m_stDescription.Wrap( -1 )
-		self.m_stDescription.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 90, False, wx.EmptyString ) )
+		self.m_stDescription = wx.richtext.RichTextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0|wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER|wx.WANTS_CHARS )
+		self.m_stDescription.SetMinSize( wx.Size( -1,100 ) )
 		
-		bSizer15.Add( self.m_stDescription, 0, wx.ALL|wx.EXPAND, 5 )
+		bSizer15.Add( self.m_stDescription, 1, wx.EXPAND |wx.ALL, 5 )
 		
 		self.m_staticText57 = wx.StaticText( self, wx.ID_ANY, u"FILES IN", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText57.Wrap( -1 )

@@ -126,15 +126,17 @@ class Config(ConfigPanel):
             if self.currentconfig in cids:
                 selection = self.cboConfigid.FindString(self.currentconfig)
                 self.cboConfigid.SetSelection(selection)
-                conf = self.dbi.getConfig(self.currentconfig)
+                conf = self.dbi.getConfigALL(self.currentconfig)
             else:
                 selection = self.cboConfigid.FindString(cids[0])
                 self.cboConfigid.SetSelection(selection)
-                conf = self.dbi.getConfig(cids[0])
+                conf = self.dbi.getConfigALL(cids[0])
             if conf is not None:
                 for k in conf.keys():
                     self.m_grid1.SetCellValue(rownum, 0, k)
-                    self.m_grid1.SetCellValue(rownum, 1, conf[k])
+                    self.m_grid1.SetCellValue(rownum, 1, conf[k][0])
+                    if conf[k][1] is not None:
+                        self.m_grid1.SetCellValue(rownum, 2, conf[k][1])
                     rownum += 1
                 self.m_grid1.AutoSizeColumns()
                 self.m_grid1.AutoSize()
@@ -146,12 +148,14 @@ class Config(ConfigPanel):
         configid = self.cboConfigid.GetValue()
         try:
             rownum =0
-            conf = self.dbi.getConfig(configid)
+            conf = self.dbi.getConfigALL(configid)
             if conf is not None:
                 self.m_grid1.ClearGrid()
                 for k in conf.keys():
                     self.m_grid1.SetCellValue(rownum, 0, k)
-                    self.m_grid1.SetCellValue(rownum, 1, conf[k])
+                    self.m_grid1.SetCellValue(rownum, 1, conf[k][0])
+                    if conf[k][1] is not None:
+                        self.m_grid1.SetCellValue(rownum, 2, conf[k][1])
                     rownum += 1
                 self.m_grid1.AutoSizeColumns()
                 self.m_grid1.AutoSize()
@@ -177,7 +181,7 @@ class Config(ConfigPanel):
         data = self.m_grid1.GetTable()
         for rownum in range(0, data.GetRowsCount()):
             if not data.IsEmptyCell(rownum, 0):
-                configlist.append((self.m_grid1.GetCellValue(rownum, 0),self.m_grid1.GetCellValue(rownum, 1),configid))
+                configlist.append((self.m_grid1.GetCellValue(rownum, 0),self.m_grid1.GetCellValue(rownum, 1),configid,self.m_grid1.GetCellValue(rownum, 2)))
         #print('Saved config:', configlist)
         # Save to DB
         cnt = self.dbi.addConfig(configid,configlist)
@@ -403,7 +407,7 @@ class ProcessRunPanel(ProcessPanel):
         filesOut = [self.controller.db.getConfigByName(self.controller.currentconfig,f) for f in filesOut[0].split(", ")]
         # Load to GUI
         self.m_stTitle.SetLabelText(event.String)
-        self.m_stDescription.SetLabelText(desc[0])
+        self.m_stDescription.WriteText(desc[0])
         self.m_stFilesin.SetLabelText(", ".join(filesIn))
         self.m_stFilesout.SetLabelText(", ".join(filesOut))
         self.Layout()
