@@ -12,11 +12,11 @@ class TestController(unittest.TestCase):
         self.configfile = join(self.resourcesdir, 'autoconfig_test.db')
         self.dbi = DBI(self.configfile)
         self.dbi.getconn()
-        self.currentconfig = 'general'
+        self.currentconfig = 'test'
         self.controller = Controller(self.configfile, self.currentconfig, self.processfile)
         # TEST DATA
         self.datafile = "D:\\Data\\Csv\\input\\control\\Brain10_Image.csv"
-        self.outputdir = "D:\\Data\\Csv\\\output"
+        self.outputdir = "D:\\Data\\Csv\\output"
         self.testcolumn = 'Count_ColocalizedGAD_DAPI_Objects'
 
     def tearDown(self):
@@ -72,9 +72,7 @@ class TestController(unittest.TestCase):
         module = importlib.import_module(module_name)
         class_ = getattr(module, class_name)
         #Instantiate FilterClass
-        mod = class_(self.datafile,self.outputdir, sheet=self.dbi.getConfigByName(self.currentconfig,'sheet'),
-                     skiprows=self.dbi.getConfigByName(self.currentconfig,'skiprows'),
-                     headers=self.dbi.getConfigByName(self.currentconfig,'headers'))
+        mod = class_(self.datafile,self.outputdir)
         cfg = mod.getConfigurables()
         for c in cfg.keys():
             print("config: ",c)

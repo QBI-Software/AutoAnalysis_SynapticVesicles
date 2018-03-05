@@ -8,7 +8,10 @@ class TestHistogram(unittest.TestCase):
     def setUp(self):
         parser = create_parser()
         args = parser.parse_args()
-        fd = AutoHistogram(args.datafile, args.outputdir, args.showplots)
+        # TEST DATA
+        self.datafile = "D:\\Data\\Csv\\input\\control\\Brain10_Image.csv"
+        self.outputdir = "D:\\Data\\Csv\\output"
+        fd = AutoHistogram(self.datafile, self.outputdir, args.showplots)
         cfg = fd.getConfigurables()
         cfg['COLUMN'] = args.column
         cfg['BINWIDTH'] = args.binwidth
@@ -19,7 +22,6 @@ class TestHistogram(unittest.TestCase):
 
     def test_histogram(self):
         self.fd.freq = 0 #'Relative freq'
-        data = self.fd.run()
         outputfile = self.fd.run()
         self.assertFalse(outputfile.endswith('DENSITY_HISTOGRAM.csv'))
 

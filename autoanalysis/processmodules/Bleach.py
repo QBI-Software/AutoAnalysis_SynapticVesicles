@@ -202,10 +202,10 @@ def create_parser():
 
                  ''')
     parser.add_argument('--datafile', action='store', help='Data file', default="EXP44 Time Trace(s).csv")
-    parser.add_argument('--bleachfile', action='store', help='Data file', default="Bleach Time Trace(s).csv")
-    parser.add_argument('--outputdir', action='store', help='Output directory', default="D:\\Dropbox\\worktransfer\\Anggono\\hilary\\batchoutput")
+    parser.add_argument('--bleachfile', action='store', help='Data file', default="Bleach.csv")
+    parser.add_argument('--outputdir', action='store', help='Output directory', default=".")
     parser.add_argument('--inputdir', action='store', help='Input directory',
-                        default="D:\\Dropbox\\worktransfer\\Anggono\\hilary\\input")
+                        default="D:\\Data\\Anggono\\data\\EXP44")
     parser.add_argument('--suffix', action='store', help='Output filename suffix', default="_Processed.xlsx")
     parser.add_argument('--roilist', action='store', help='Selected ROI list', default="_ROIlist.csv")
 

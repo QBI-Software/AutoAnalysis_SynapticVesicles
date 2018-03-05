@@ -409,6 +409,7 @@ class ProcessRunPanel(ProcessPanel):
         filesOut = [self.controller.db.getConfigByName(self.controller.currentconfig,f) for f in filesOut[0].split(", ")]
         # Load to GUI
         self.m_stTitle.SetLabelText(event.String)
+        self.m_stDescription.Clear()
         self.m_stDescription.WriteText(desc[0])
         self.m_stFilesin.SetLabelText(", ".join(filesIn))
         self.m_stFilesout.SetLabelText(", ".join(filesOut))

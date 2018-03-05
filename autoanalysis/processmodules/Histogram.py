@@ -116,9 +116,9 @@ def create_parser():
 
                  ''')
     parser.add_argument('--datafile', action='store', help='Initial data file',
-                        default="..\\..\\sampledata\\Brain11_Image_FILTERED.csv")
+                        default="Brain11_Image_FILTERED.csv")
     parser.add_argument('--outputdir', action='store', help='Output directory (must exist)',
-                        default="..\\..\\sampledata")
+                        default="sampledata")
     parser.add_argument('--column', action='store', help='Column header to be analysed',
                         default="Count_ColocalizedGAD_DAPI_Objects")
     parser.add_argument('--binwidth', action='store', help='Binwidth for relative frequency', default='1')
@@ -131,8 +131,11 @@ def create_parser():
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
-    print("Input:", args.datafile)
-    print("Output:", args.outputdir)
+    outputdir = join("..", "..", args.outputdir)
+    datafile = join(outputdir, args.datafile)
+
+    print("Input:", datafile)
+    print("Output:", outputdir)
     try:
         fd = AutoHistogram(args.datafile, args.outputdir, args.showplots)
         cfg = fd.getConfigurables()

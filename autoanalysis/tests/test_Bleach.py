@@ -8,8 +8,8 @@ class TestBleach(unittest.TestCase):
     def setUp(self):
         parser = create_parser()
         args = parser.parse_args()
-        inputdir = args.outputdir
-        datafiles = [join(inputdir, args.datafile), join(inputdir, args.bleachfile)]
+        inputdir = args.inputdir
+        datafiles = join(inputdir, args.datafile)
         self.mod = Bleach(datafiles, args.outputdir, showplots=False)
         self.args = args
 
