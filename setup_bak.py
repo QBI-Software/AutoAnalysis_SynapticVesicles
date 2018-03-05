@@ -29,7 +29,7 @@
 # test with exe
 # then run bdist_msi
 # create 64bit from 32bit python with python setup.py build --plat-name=win-amd64
-# NB To add Shortcut working dir - change cx_freeze/windist.py Line 61 : last None - > 'TARGETDIR'
+
 import os
 import sys
 import shutil
@@ -47,24 +47,19 @@ os.environ['TK_LIBRARY'] = join(mainpython, 'tcl', 'tk8.6')
 base = None
 if sys.platform == 'win32':
     base = 'Win32GUI'
-ufuncs_version='_ufuncs.cp36-win32.pyd'
+
 build_exe_options = {
-    'includes': ['idna.idnadata', "numpy", "plotly","pandas", "packaging.version","packaging.specifiers", "packaging.requirements","appdirs",'scipy.spatial.cKDTree'],
-    'excludes': ['PyQt4', 'PyQt5','boto'],
-    'packages': ['sqlite3','scipy', 'numpy.core._methods', 'numpy.lib.format', 'plotly'],
-    'include_files': ['autoanalysis/',join(mainpython, 'DLLs', 'sqlite3.dll'),
+    'includes': ['idna.idnadata', "numpy", "plotly", "packaging.version","packaging.specifiers", "packaging.requirements","appdirs",'scipy.spatial.cKDTree'],
+    'excludes': ['PyQt4', 'PyQt5'],
+    'packages': ['sqlite3','scipy','seaborn', 'numpy.core._methods', 'numpy.lib.format', 'plotly'],
+    'include_files': ['autoanalysis/',
                       #join(venvpython, 'seaborn', 'external'),
                       #join(mainpython, 'DLLs', 'tcl86t.dll'),
                       #join(mainpython, 'DLLs', 'tk86t.dll'),
-                      (join(venvpython, 'scipy', 'special', ufuncs_version), '_ufuncs.pyd')],
+                      (join(venvpython, 'scipy', 'special', '_ufuncs.cp36-win32.pyd'), '_ufuncs.pyd')],
     'include_msvcr': 1
-
 }
-bdist_msi_options = {
-    "upgrade_code": "{175FE673-CF61-416B-9C82-EF811886165D}" #get uid from first installation regedit
-    }
-# MSDAnalysis HKEY_USERS\S-1-5-21-2111889174-1506992555-1484156688-1004\Software\Microsoft\Windows\CurrentVersion\Search\RecentApps\{8077FF32-9BEE-4769-9630-736FB8A49026}
-
+# [Bad fix but only thing that works] NB To add Shortcut working dir - change cx_freeze/windist.py Line 61 : last None - > 'TARGETDIR'
 setup(
     name=application_title,
     version=__version__,
@@ -76,7 +71,7 @@ setup(
     maintainer_email='qbi-dev-admin@uq.edu.au',
     url='http://github.com/QBI-Software/AutoAnalysis_SynapticVesicles',
     license='GNU General Public License (GPL)',
-    options={'build_exe': build_exe_options, 'bdist_msi': bdist_msi_options},
+    options={'build_exe': build_exe_options, },
     executables=[Executable(main_python_file,
                             base=base,
                             targetName='autoanalysis_sv.exe',
@@ -87,7 +82,7 @@ setup(
 )
 
 #Rename ckdtree
-os_version='exe.win32-3.6'
-ckd_version= 'cKDTree.cp36-win32.pyd'
+os_version='exe.win32-3.6' #'exe.win-amd64-3.5'
+ckd_version= 'cKDTree.cp36-win32.pyd'#'cKDTree.cp35-win_amd64.pyd'
 shutil.move(join('build',os_version,'lib','scipy','spatial',ckd_version), join('build',os_version,'lib','scipy','spatial','ckdtree.pyd'))
 shutil.copyfile(join('build',os_version,'lib','scipy','spatial','ckdtree.pyd'), join('build',os_version,'lib','scipy','spatial',ckd_version))

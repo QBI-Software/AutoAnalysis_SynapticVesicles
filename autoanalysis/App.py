@@ -17,7 +17,9 @@ plt.style.use('seaborn-paper')
 import wx
 import wx.html2
 from os.path import abspath, dirname, commonpath
+from os import access,R_OK, mkdir
 from glob import iglob
+import shutil
 from configobj import ConfigObj
 from autoanalysis.controller import EVT_RESULT, Controller
 from autoanalysis.gui.appgui import ConfigPanel, FilesPanel, WelcomePanel, ProcessPanel,dlgLogViewer
@@ -106,7 +108,7 @@ class Config(ConfigPanel):
     def __init__(self, parent):
         super(Config, self).__init__(parent)
         self.parent = parent
-        self.configdb = join(self.parent.resourcesdir, 'autoconfig.db')
+        self.configdb = self.parent.configfile
         self.dbi = DBI(self.configdb)
         self.loadController()
 
@@ -554,14 +556,27 @@ class AppMain(wx.Listbook):
         wx.Listbook.__init__(self, parent, wx.ID_ANY, style=wx.BK_DEFAULT)
         self.resourcesdir = findResourceDir()
         self.processfile = join(self.resourcesdir, 'processes.yaml')
-        self.configfile = join(self.resourcesdir, 'autoconfig.db')
-
+        self.configfile = self.getConfigdb()
         self.currentconfig = 'general'
         self.controller = Controller(self.configfile, self.currentconfig, self.processfile)
 
         self.InitUI()
         self.Centre(wx.BOTH)
         self.Show()
+
+    def getConfigdb(self):
+        # Save config db to user's home dir or else will be overwritten with updates
+        self.userconfigdir = join(expanduser('~'), '.qbi_autoanalysis')
+        dbname = 'autoconfig.db'
+        if not access(self.userconfigdir, R_OK):
+            mkdir(self.userconfigdir)
+        configdb = join(self.userconfigdir,dbname)
+        if not access(configdb, R_OK):
+            defaultdb = join(self.resourcesdir, dbname)
+            shutil.copy(defaultdb,configdb)
+
+        return configdb
+
 
     def InitUI(self):
 
