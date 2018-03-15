@@ -68,7 +68,7 @@ bdist_msi_options = {
 setup(
     name=application_title,
     version=__version__,
-    description='Auto analysis of synaptic vesicle particle tracking data (Anggono)',
+    description='Auto analysis of synaptic vesicle particle tracking data (Anggono,QBI)',
     long_description=open('README.md').read(),
     author='Liz Cooper-Williams, QBI',
     author_email='e.cooperwilliams@uq.edu.au',
