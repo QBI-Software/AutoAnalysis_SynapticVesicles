@@ -24,7 +24,7 @@ from configobj import ConfigObj
 from autoanalysis.controller import EVT_RESULT, Controller
 from autoanalysis.gui.appgui import ConfigPanel, FilesPanel, WelcomePanel, ProcessPanel,dlgLogViewer
 
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 
 
 ##### Global functions
@@ -582,18 +582,19 @@ class AppMain(wx.Listbook):
     def InitUI(self):
 
         # make an image list using the LBXX images
-        # il = wx.ImageList(32, 32)
-        # # for x in [wx.ArtProvider.]:
-        # #     obj = getattr(images, 'LB%02d' % (x + 1))
-        # #     bmp = obj.GetBitmap()
-        # #     il.Add(bmp)
-        # bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP_SETTINGS, wx.ART_FRAME_ICON, (16, 16))
+        il = wx.ImageList(32, 32)
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_FRAME_ICON, (32, 32))
+        il.Add(bmp)
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_FRAME_ICON, (32, 32))
+        il.Add(bmp)
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_FRAME_ICON, (32, 32))
+        il.Add(bmp)
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_FRAME_ICON, (32, 32))
+        il.Add(bmp)
+        # bmp = wx.ArtProvider.GetBitmap(wx.ART_REPORT_VIEW, wx.ART_FRAME_ICON, (32, 32))
         # il.Add(bmp)
-        # bmp = wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_FRAME_ICON, (16, 16))
-        # il.Add(bmp)
-        # bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_FRAME_ICON, (16, 16))
-        # il.Add(bmp)
-        # self.AssignImageList(il)
+
+        self.AssignImageList(il)
 
         pages = [(HomePanel(self), "Welcome"),
                  (Config(self), "Configure"),
@@ -601,8 +602,8 @@ class AppMain(wx.Listbook):
                  (ProcessRunPanel(self), "Run Processes")]
         imID = 0
         for page, label in pages:
-            # self.AddPage(page, label, imageId=imID)
-            self.AddPage(page, label)
+            self.AddPage(page, label, imageId=imID)
+            # self.AddPage(page, label)
             imID += 1
 
         self.GetListView().SetColumnWidth(0, wx.LIST_AUTOSIZE)

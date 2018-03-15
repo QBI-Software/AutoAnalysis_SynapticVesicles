@@ -51,7 +51,7 @@ ufuncs_version='_ufuncs.cp36-win32.pyd'
 build_exe_options = {
     'includes': ['idna.idnadata', "numpy", "plotly","pandas", "packaging.version","packaging.specifiers", "packaging.requirements","appdirs",'scipy.spatial.cKDTree'],
     'excludes': ['PyQt4', 'PyQt5','boto'],
-    'packages': ['sqlite3','scipy', 'numpy.core._methods', 'numpy.lib.format', 'plotly'],
+    'packages': ['sqlite3','scipy', 'numpy.core._methods', 'numpy.lib.format', 'plotly','wx'],
     'include_files': ['autoanalysis/',join(mainpython, 'DLLs', 'sqlite3.dll'),
                       #join(venvpython, 'seaborn', 'external'),
                       #join(mainpython, 'DLLs', 'tcl86t.dll'),
