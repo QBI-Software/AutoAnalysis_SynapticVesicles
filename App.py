@@ -16,6 +16,7 @@
     GNU General Public License for more details.
 '''
 import csv
+import sys
 import re
 import time
 from os.path import join, expanduser, isdir, sep
@@ -81,7 +82,7 @@ class HomePanel(WelcomePanel):
         self.m_richText1.WriteImage(img)
         self.m_richText1.Newline()
         self.m_richText1.WriteText(
-            r'''This is a multi-threaded application designed to automate analysis.''')
+            r'''This is a multi-threaded application designed to automate analysis developed for the Anggono Lab, QBI.''')
         self.m_richText1.Newline()
         # self.m_richText1.BeginNumberedBullet(1, 0.2, 0.2, wx.TEXT_ATTR_BULLET_STYLE)
         self.m_richText1.BeginBold()
@@ -184,7 +185,7 @@ class Config(ConfigPanel):
                     fp.loadController()
             # notification
             msg = "Config loaded: %s" % configid
-            self.Parent.Warn(msg)
+            self.Parent.Info(msg)
         except Exception as e:
             self.Parent.Warn(e.args[0])
         finally:
@@ -216,7 +217,7 @@ class Config(ConfigPanel):
                 fp.loadController()
         #notification
         msg = "Config saved: %s" % configid
-        self.Parent.Warn(msg)
+        self.Parent.Info(msg)
         self.dbi.closeconn()
 
     def OnAddRow(self, event):
@@ -621,7 +622,8 @@ class AppMain(wx.Listbook):
             # self.AddPage(page, label)
             imID += 1
 
-        self.GetListView().SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        if sys.platform == 'win32':
+            self.GetListView().SetColumnWidth(0, wx.LIST_AUTOSIZE)
 
         self.Bind(wx.EVT_LISTBOOK_PAGE_CHANGED, self.OnPageChanged)
         self.Bind(wx.EVT_LISTBOOK_PAGE_CHANGING, self.OnPageChanging)
@@ -646,6 +648,11 @@ class AppMain(wx.Listbook):
 
     def Warn(self, message, caption='Warning!'):
         dlg = wx.MessageDialog(self, message, caption, wx.OK | wx.ICON_WARNING)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def Info(self, message, caption='Info'):
+        dlg = wx.MessageDialog(self, message, caption, wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
         dlg.Destroy()
 
