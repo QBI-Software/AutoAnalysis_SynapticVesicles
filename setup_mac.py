@@ -22,15 +22,16 @@ import sys
 from os.path import join
 from os import getcwd
 #Self -bootstrapping https://py2app.readthedocs.io
-import ez_setup
-ez_setup.use_setuptools()
+# import ez_setup
+# ez_setup.use_setuptools()
 
 from setuptools import setup
 
 from App import __version__
 
-#Fix for recursion issue
-sys.setrecursionlimit(1500)
+#Fix for recursion issue ?
+#sys.setrecursionlimit(3000) - does nothing
+# renamed path.py in wx library to path1.py - interferes?
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('.','App.py')
 venvpython = join(sys.prefix,'Lib','site-packages')
@@ -46,12 +47,13 @@ plist = dict(CFBundleDisplayName=application_title,
 
 APP = ['App.py']
 DATA_FILES = ['autoanalysis/resources/']
-PARENTDIR= getcwd()
+PARENTDIR= join(getcwd(),'.')
 OPTIONS = {'argv_emulation': True,
-           'use_pythonpath': True,
+           #'use_pythonpath': True,
            'plist': plist,
            'iconfile': 'autoanalysis/resources/newplot.ico',
            #'packages': ['sqlite3','scipy', 'wx'],
+           'excludes':['PyQt5'],
            'bdist_base': join(PARENTDIR, 'build'),
            'dist_dir': join(PARENTDIR, 'dist'),
            }
