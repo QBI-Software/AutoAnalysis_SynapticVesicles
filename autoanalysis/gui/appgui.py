@@ -52,6 +52,16 @@ class ConfigPanel ( wx.Panel ):
 		self.cboConfigid.SetSelection( 0 )
 		bSizer14.Add( self.cboConfigid, 0, wx.ALL, 5 )
 		
+		self.btnSave = wx.Button( self, wx.ID_ANY, u"Save Changes", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.btnSave.SetDefault() 
+		self.btnSave.SetForegroundColour( wx.Colour( 255, 255, 0 ) )
+		self.btnSave.SetBackgroundColour( wx.Colour( 0, 128, 0 ) )
+		
+		bSizer14.Add( self.btnSave, 0, wx.ALL, 5 )
+		
+		self.m_button13 = wx.Button( self, wx.ID_ANY, u"Add Row", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer14.Add( self.m_button13, 0, wx.ALL, 5 )
+		
 		
 		bSizer17.Add( bSizer14, 1, wx.ALL|wx.EXPAND, 5 )
 		
@@ -85,16 +95,6 @@ class ConfigPanel ( wx.Panel ):
 		bSizer17.Add( self.m_grid1, 0, wx.ALIGN_TOP|wx.EXPAND, 5 )
 		
 		bSizer21 = wx.BoxSizer( wx.HORIZONTAL )
-		
-		self.btnSave = wx.Button( self, wx.ID_ANY, u"Save Changes", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.btnSave.SetDefault() 
-		self.btnSave.SetForegroundColour( wx.Colour( 255, 255, 0 ) )
-		self.btnSave.SetBackgroundColour( wx.Colour( 0, 128, 0 ) )
-		
-		bSizer21.Add( self.btnSave, 0, wx.ALL, 5 )
-		
-		self.m_button13 = wx.Button( self, wx.ID_ANY, u"Add", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer21.Add( self.m_button13, 0, wx.ALL, 5 )
 		
 		
 		bSizer17.Add( bSizer21, 1, wx.ALL, 5 )
@@ -213,7 +213,7 @@ class ProcessPanel ( wx.Panel ):
 		
 		bSizer21 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_dataViewListCtrlRunning = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.dataview.DV_ROW_LINES|wx.FULL_REPAINT_ON_RESIZE|wx.VSCROLL )
+		self.m_dataViewListCtrlRunning = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.dataview.DV_ROW_LINES )
 		self.m_dataViewListCtrlRunning.SetMinSize( wx.Size( -1,400 ) )
 		
 		self.m_dataViewListColumnProcess = self.m_dataViewListCtrlRunning.AppendTextColumn( u"Process" )
@@ -499,7 +499,7 @@ class FilesPanel ( wx.Panel ):
 		
 		bSizer18 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.m_dataViewListCtrl1 = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.dataview.DV_MULTIPLE|wx.HSCROLL|wx.VSCROLL )
+		self.m_dataViewListCtrl1 = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.dataview.DV_MULTIPLE )
 		self.m_dataViewListCtrl1.SetMinSize( wx.Size( -1,300 ) )
 		
 		self.col_selected = self.m_dataViewListCtrl1.AppendToggleColumn( u"Select" )
