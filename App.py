@@ -1,14 +1,30 @@
-# import images
-# import logging
+'''
+    QBI Auto Analysis APP: Synaptic Vesicles (Windows 64bit MSI)
+
+    Main App
+    *******************************************************************************
+    Copyright (C) 2017  QBI Software, The University of Queensland
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+'''
 import csv
 import re
 import time
-from glob import iglob
 from os.path import join, expanduser, isdir, sep
-from autoanalysis.db.dbquery import DBI
+
 # maintain this order of matplotlib
 # TkAgg causes Runtime errors in Thread
 import matplotlib
+
+from autoanalysis.db.dbquery import DBI
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -16,11 +32,10 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-paper')
 import wx
 import wx.html2
-from os.path import abspath, dirname, commonpath
+from os.path import abspath, commonpath
 from os import access,R_OK, mkdir
 from glob import iglob
 import shutil
-from configobj import ConfigObj
 from autoanalysis.controller import EVT_RESULT, Controller
 from autoanalysis.gui.appgui import ConfigPanel, FilesPanel, WelcomePanel, ProcessPanel,dlgLogViewer
 

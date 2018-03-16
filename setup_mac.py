@@ -4,11 +4,13 @@ Usage:
 
     [ref: http://doc.qt.io/qt-4.8/deployment-mac.html]
 """
-from setuptools import setup
-from plistlib import Plist
-from os.path import join
 import sys
-from autoanalysis.App import __version__
+from os.path import join
+
+from setuptools import setup
+
+from App import __version__
+
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('autoanalysis','App.py')
 venvpython = join(sys.prefix,'Lib','site-packages')

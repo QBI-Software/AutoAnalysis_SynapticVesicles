@@ -23,7 +23,7 @@
 ####
 # Issues with scipy and cx-freeze -> https://stackoverflow.com/questions/32432887/cx-freeze-importerror-no-module-named-scipy
 # 1. changed cx_Freeze/hooks.py scipy.lib to scipy._lib (line 560)
-#then run setup.py build
+# then run setup.py build
 # 2. changed scipy/spatial cKDTree.cp35-win_amd64.pyd to ckdtree.cp35-win_amd64.pyd
 # 3. change Plot.pyc to plot.pyc in multiprocessing
 # test with exe
@@ -31,11 +31,13 @@
 # create 64bit from 32bit python with python setup.py build --plat-name=win-amd64
 # NB To add Shortcut working dir - change cx_freeze/windist.py Line 61 : last None - > 'TARGETDIR'
 import os
-import sys
 import shutil
+import sys
 from os.path import join
+
 from cx_Freeze import setup, Executable
-from autoanalysis.App import __version__
+
+from App import __version__
 
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('autoanalysis','App.py')

@@ -31,11 +31,13 @@
 # create 64bit from 32bit python with python setup.py build --plat-name=win-amd64
 
 import os
-import sys
 import shutil
+import sys
 from os.path import join
+
 from cx_Freeze import setup, Executable
-from autoanalysis.App import __version__
+
+from App import __version__
 
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('autoanalysis','App.py')
