@@ -29,7 +29,8 @@ from setuptools import setup
 
 from App import __version__
 
-
+#Fix for recursion issue
+sys.setrecursionlimit(1500)
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('.','App.py')
 venvpython = join(sys.prefix,'Lib','site-packages')
