@@ -26,14 +26,17 @@ from os.path import join, expanduser, isdir, sep
 import matplotlib
 
 from autoanalysis.db.dbquery import DBI
-
-matplotlib.use('Agg')
+if sys.platform == 'Darwin':
+    matplotlib.use('Agg')
+else:
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 plt.style.use('seaborn-paper')
 import wx
 import wx.html2
-from os.path import abspath, commonpath
+from os.path import abspath
+import logging
 from os import access,R_OK, mkdir
 from glob import iglob
 import shutil
@@ -45,14 +48,30 @@ __version__ = '1.0.0'
 
 ##### Global functions
 def findResourceDir():
-    allfiles = [y for y in iglob(join('.', '**', "resources"), recursive=True)]
-    files = [f for f in allfiles if not 'build' in f]
-    resource_dir = commonpath(files)
-    if len(resource_dir) > 0:
-        print("Resource directory located to: ", resource_dir)
+    # try local
+    if sys.platform =='darwin':
+        resource_dir = join('.', 'resources')
     else:
-        resource_dir =join('autoanalysis','resources')
-
+        resource_dir = join('.', 'autoanalysis', 'resources')
+    logging.debug("1. Base resource dir:",resource_dir)
+    if not access(resource_dir,R_OK):
+        logging.debug('1b. Cannot access local resource_dir')
+        #Try to locate resource dir
+        allfiles = [y for y in iglob(join('.', '**', "resources"), recursive=True)]
+        files = [f for f in allfiles if not 'build' in f]
+        logging.debug('Possible paths: ', len(files))
+        if len(files) == 1:
+            resource_dir = files[0]
+            logging.debug('2. Found resources at: ', abspath(resource_dir))
+        elif len(files) > 1:
+            for rf in files:
+                if access(rf, R_OK):
+                    resource_dir= rf
+                    logging.debug('3. Access resources at ', abspath(rf))
+                    break
+        else:
+            raise ValueError('Cannot locate resources dir: ', abspath(resource_dir))
+    logging.info('Resources dir located to: ', abspath(resource_dir))
     return abspath(resource_dir)
 
 

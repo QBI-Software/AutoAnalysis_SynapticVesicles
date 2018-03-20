@@ -352,7 +352,7 @@ class Controller():
             mkdir(join(homedir, "logs"))
         self.logfile = join(homedir, "logs", expt+'analysis.log')
         handler = RotatingFileHandler(filename=self.logfile, maxBytes=10000000, backupCount=10)
-        formatter = logging.Formatter('[ %(asctime)s %(levelname)-4s ] (%(threadName)-9s) %(message)s')
+        formatter = logging.Formatter('[ %(asctime)s %(levelname)-4s ] %(filename)s %(lineno)d : (%(threadName)-9s) %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger

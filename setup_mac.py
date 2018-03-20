@@ -14,16 +14,19 @@
     GNU General Public License for more details.
 
 Usage:
-    python3 setup.py py2app
+    python setup_mac.py py2app --matplotlib-backends='-'
 
-    [ref: http://doc.qt.io/qt-4.8/deployment-mac.html]
+Notes:
+    May need to use system python rather than virtualenv
+    Macholib version=1.7 required to prevent endless recursions
+    Specify matplotlib backends with '-'
 '''
 import sys
 from os.path import join
 from os import getcwd
 #Self -bootstrapping https://py2app.readthedocs.io
-# import ez_setup
-# ez_setup.use_setuptools()
+import ez_setup
+ez_setup.use_setuptools()
 
 from setuptools import setup
 
@@ -41,26 +44,30 @@ mainpython = "/Library/Frameworks/Python.framework/Versions/3.6/bin/python3"
 # plist = Plist.fromFile('Info.plist')
 plist = dict(CFBundleDisplayName=application_title,
              NSHumanReadableCopyright='Copyright (c) 2018 Queensland Brain Institute',
-             CFBundleTypeIconFile='autoanalysis/resources/newplot.ico',
+             CFBundleTypeIconFile='newplot.ico',
              CFBundleVersion=__version__
             )
 
 APP = ['App.py']
-DATA_FILES = ['autoanalysis/resources/']
+DATA_FILES = [join('autoanalysis','resources')]
 PARENTDIR= join(getcwd(),'.')
 OPTIONS = {'argv_emulation': True,
            #'use_pythonpath': True,
            'plist': plist,
-           'iconfile': 'autoanalysis/resources/newplot.ico',
-           #'packages': ['sqlite3','scipy', 'wx'],
-           'excludes':['PyQt5'],
+           'iconfile': join('autoanalysis','resources','newplot.ico'),
+           'packages': ['sqlite3','scipy', 'wx','pandas','autoanalysis.processmodules'],
+           'includes':['six','appdirs','packaging','packaging.version','packaging.specifiers','packaging.requirements','os','numbers','future_builtins'],
+           #'include_files':[join('autoanalysis','processmodules')],
+           #'excludes':['PyQt5'],
+           #'matplotlib-backends': '-', #include only backends specified
            'bdist_base': join(PARENTDIR, 'build'),
            'dist_dir': join(PARENTDIR, 'dist'),
            }
 
 setup(
+    name='AutoAnalysis_SynapticVesicles',
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
+    setup_requires=['py2app','pyobjc-framework-Cocoa','numpy','scipy'],
 )
