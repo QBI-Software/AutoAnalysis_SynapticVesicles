@@ -42,10 +42,12 @@ mainpython = "/Library/Frameworks/Python.framework/Versions/3.6/bin/python3"
 
 # Add info to MacOSX plist
 # plist = Plist.fromFile('Info.plist')
-plist = dict(CFBundleDisplayName=application_title,
-             NSHumanReadableCopyright='Copyright (c) 2018 Queensland Brain Institute',
-             CFBundleTypeIconFile='newplot.ico',
-             CFBundleVersion=__version__
+plist = dict(
+    CFBundleName='autoanalysis_sv',
+    CFBundleDisplayName=application_title,
+    NSHumanReadableCopyright='Copyright (c) 2018 Queensland Brain Institute',
+    CFBundleTypeIconFile='newplot.icns',
+    CFBundleVersion=__version__
             )
 
 APP = ['App.py']
@@ -54,7 +56,7 @@ PARENTDIR= join(getcwd(),'.')
 OPTIONS = {'argv_emulation': True,
            #'use_pythonpath': True,
            'plist': plist,
-           'iconfile': join('autoanalysis','resources','newplot.ico'),
+           'iconfile': join('autoanalysis','resources','newplot.icns'),
            'packages': ['sqlite3','scipy', 'wx','pandas','autoanalysis.processmodules'],
            'includes':['six','appdirs','packaging','packaging.version','packaging.specifiers','packaging.requirements','os','numbers','future_builtins'],
            #'include_files':[join('autoanalysis','processmodules')],
@@ -65,7 +67,7 @@ OPTIONS = {'argv_emulation': True,
            }
 
 setup(
-    name='AutoAnalysis_SynapticVesicles',
+    name='autoanalysis_sv',
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
