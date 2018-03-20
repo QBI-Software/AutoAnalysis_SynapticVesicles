@@ -16,8 +16,13 @@
 Usage:
     python setup_mac.py py2app --matplotlib-backends='-'
 
+
 Notes:
+    Clean on reruns:
+    > rm -rf build dist __pycache__
     May need to use system python rather than virtualenv
+    > /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6 setup_mac.py py2app --matplotlib-backends='-' > build.log
+
     Macholib version=1.7 required to prevent endless recursions
     Specify matplotlib backends with '-'
 '''
@@ -32,9 +37,6 @@ from setuptools import setup
 
 from App import __version__
 
-#Fix for recursion issue ?
-#sys.setrecursionlimit(3000) - does nothing
-# renamed path.py in wx library to path1.py - interferes?
 application_title = 'QBI AutoAnalysis SynapticVesicles'
 main_python_file = join('.','App.py')
 venvpython = join(sys.prefix,'Lib','site-packages')
@@ -59,9 +61,6 @@ OPTIONS = {'argv_emulation': True,
            'iconfile': join('autoanalysis','resources','newplot.icns'),
            'packages': ['sqlite3','scipy', 'wx','pandas','autoanalysis.processmodules'],
            'includes':['six','appdirs','packaging','packaging.version','packaging.specifiers','packaging.requirements','os','numbers','future_builtins'],
-           #'include_files':[join('autoanalysis','processmodules')],
-           #'excludes':['PyQt5'],
-           #'matplotlib-backends': '-', #include only backends specified
            'bdist_base': join(PARENTDIR, 'build'),
            'dist_dir': join(PARENTDIR, 'dist'),
            }
