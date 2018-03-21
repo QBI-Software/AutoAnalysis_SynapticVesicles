@@ -703,7 +703,7 @@ class AppFrame(wx.Frame):
     def __init__(self):
         """Constructor"""
         wx.Frame.__init__(self, None, wx.ID_ANY,
-                          "Auto Analysis Application",
+                          "QBI Auto Analysis SV",
                           size=(900, 700)
                           )
 

@@ -30,22 +30,23 @@ import sys
 from os.path import join
 from os import getcwd
 #Self -bootstrapping https://py2app.readthedocs.io
-import ez_setup
-ez_setup.use_setuptools()
+# import ez_setup
+# ez_setup.use_setuptools()
 
 from setuptools import setup
 
 from App import __version__
 
 application_title = 'QBI AutoAnalysis SynapticVesicles'
-main_python_file = join('.','App.py')
-venvpython = join(sys.prefix,'Lib','site-packages')
-mainpython = "/Library/Frameworks/Python.framework/Versions/3.6/bin/python3"
+exe_name='autoanalysis_sv'
+#main_python_file = join('.','App.py')
+#venvpython = join(sys.prefix,'Lib','site-packages')
+#mainpython = "/Library/Frameworks/Python.framework/Versions/3.6/bin/python3"
 
 # Add info to MacOSX plist
 # plist = Plist.fromFile('Info.plist')
 plist = dict(
-    CFBundleName='autoanalysis_sv',
+    CFBundleName=exe_name,
     CFBundleDisplayName=application_title,
     NSHumanReadableCopyright='Copyright (c) 2018 Queensland Brain Institute',
     CFBundleTypeIconFile='newplot.icns',
@@ -66,7 +67,7 @@ OPTIONS = {'argv_emulation': True,
            }
 
 setup(
-    name='autoanalysis_sv',
+    name=exe_name,
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
