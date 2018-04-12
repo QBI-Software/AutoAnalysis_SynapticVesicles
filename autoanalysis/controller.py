@@ -206,7 +206,7 @@ class ProcessThread(threading.Thread):
                     print(msg)
                     logger.info(msg)
                     #TODO fix this
-                    # wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))
+                    wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))
                     self.processBatch(self.filenames[group], q, group)
                     i += 1
 
@@ -219,7 +219,7 @@ class ProcessThread(threading.Thread):
                     msg = "PROCESS THREAD: %s run: count=%d of %d (%d percent)" % (self.processname, i+1, total_files, count)
                     print(msg)
                     logger.info(msg)
-                    #wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))
+                    wx.PostEvent(self.wxObject, ResultEvent((count, self.row, i + 1, total_files, self.processname)))
                     self.processData(files[i], q)
 
             wx.PostEvent(self.wxObject, ResultEvent((100, self.row, total_files, total_files, self.processname)))
